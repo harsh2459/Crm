@@ -1,5 +1,6 @@
 const ChatRoom = require('../model/ChatRoom ');
 const Message = require('../model/Message');
+const { createNotification } = require('./notificationController');
 
 exports.createOrGetChatRoom = async (req, res) => {
     const { senderEmpId, receiverEmpId } = req.body;
@@ -33,6 +34,13 @@ exports.sendMessage = async (req, res) => {
             content: content || null,
             fileUrl: file ? `/uploads/${file.filename}` : null,
             fileType: file ? file.mimetype : null
+        });
+        
+        await createNotification({
+            empId: receiverEmpId,
+            title: "New Message",
+            description: `You have a new message from ${senderEmpId}`,
+            type: "message",
         });
 
         await message.save();
@@ -110,7 +118,6 @@ exports.getLatestMessagesForInbox = async (req, res) => {
                 });
             }
         }
-
         res.json(latestMessages);
     } catch (err) {
         res.status(500).json({ error: err.message });

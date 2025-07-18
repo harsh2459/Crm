@@ -1,7 +1,8 @@
 const Admin = require('../model/Admin');
 const Task = require('../model/Task');
 const Employee = require('../model/employees')
-const user = require('../model/Sign_up')
+const user = require('../model/Sign_up');
+const { createNotification } = require('./notificationController');
 
 exports.AdminSignup = async (req, res) => {
     const { name, email, password, role } = req.body;
@@ -87,6 +88,12 @@ exports.assignTask = async (req, res) => {
         });
 
         await newTask.save();
+        await createNotification({
+            empId: employee.employeeCode,
+            title: "New Task Assigned",
+            description: taskDescription,
+            type: "task"
+        });
 
         res.status(201).json({ message: 'Task assigned successfully', newTask });
 
@@ -120,7 +127,7 @@ exports.GetSingleEmployeeTasks = async (req, res) => {
     try {
         const { employeeCode } = req.body;  // Get employeeCode from the URL params
 
-        
+
         const tasks = await Task.find({ assignedTo: employeeCode });
 
         if (tasks.length === 0) {

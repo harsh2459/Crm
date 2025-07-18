@@ -11,6 +11,7 @@ const companyRouter = require('./routes/companyRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const adminRoutes = require('./routes/AdminRoutes');
 const chatRoutes = require('./routes/ChatRoutes');
+const NotificationRoutes = require('./routes/NotificationRoutes');
 
 var app = express();
 
@@ -33,10 +34,11 @@ app.use(cookieParser());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/api', companyRouter);
-app.use('/api', employeeRoutes);
+app.use('/api/company', companyRouter);
+app.use('/api/employee', employeeRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/notification', NotificationRoutes);
 
 app.use(function (req, res, next) {
   next(createError(404));
