@@ -3,10 +3,10 @@ const bcrypt = require('bcrypt');
 const moment = require('moment');
 const User = require('../model/Sign_up');
 const Employee = require('../model/employees');
-const Company = require('../model/company');
 const sendOtpEmail = require('../utlis/sendEmail');
 const sendSignupEmail = require('../utlis/sendSignupEmail');
 const generateEmployeeCode = require('../utlis/generateEmployeeCode');
+
 
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -15,6 +15,7 @@ function generateOtp() {
 exports.sendOtp = async (req, res) => {
     try {
         const { email } = req.body;
+
         if (!email || !email.endsWith('@gmail.com')) {
             return res.status(400).json({ error: 'Email must end with @gmail.com' });
         }
@@ -29,7 +30,7 @@ exports.sendOtp = async (req, res) => {
         const otpExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
         if (!user) {
-            user = new User({ email, otp, otpExpires });
+           user = new User({ email, otp, otpExpires, employeeCode: `TEMP-${Date.now()}` });
         } else {
             user.otp = otp;
             user.otpExpires = otpExpires;
@@ -37,14 +38,14 @@ exports.sendOtp = async (req, res) => {
 
         await user.save();
         await sendOtpEmail(email, otp);
-        console.log('Generated OTP:', otp);
         res.status(200).json({ message: 'OTP sent to your email' });
 
     } catch (err) {
-        console.error('Send OTP error:', err);
+        console.error('Send OTP error:', err);  // Log the error
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 exports.resendOtp = async (req, res) => {
     try {
@@ -85,7 +86,7 @@ exports.verifyOtp = async (req, res) => {
         // Mark as OTP verified (but NOT isVerified, so user can set password later)
         user.otp = undefined;
         user.otpExpires = undefined;
-        user.otpVerified = true; // <-- Add this field in your User schema if not already!
+        user.isVerified = true;
         await user.save();
 
         res.status(200).json({ message: 'OTP verified!' });
@@ -106,9 +107,9 @@ exports.CompleteSignup = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-        if (user.isVerified) {
+        if (!user.isVerified) {
             if (file) fs.unlinkSync(file.path);
-            return res.status(400).json({ error: 'User already verified' });
+            return res.status(400).json({ error: 'User is not verified' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -126,7 +127,7 @@ exports.CompleteSignup = async (req, res) => {
             salary: null,
             shiftId: null,
             contact: {
-                phone: phone_no,
+                phone: "+91" + phone_no,
                 email: email,
                 address: address
             },
@@ -136,7 +137,7 @@ exports.CompleteSignup = async (req, res) => {
         await newEmployee.save();
 
         user.name = name;
-        user.phone_no = phone_no;
+        user.phone_no = "+91" + phone_no;
         user.address = address;
         user.company = company;
         user.file = filename;
@@ -145,10 +146,13 @@ exports.CompleteSignup = async (req, res) => {
         user.isVerified = true;
         user.otpVerified = false;
         await user.save();
+        
+        await sendSignupEmail(email, employeeCode);
 
-        await sendSignupEmail(email, employeeCode, password);
+        res.status(200).json({
+            message: 'Signup complete, credentials sent to email',
+        });
 
-        res.status(200).json({ message: 'Signup complete, credentials sent to email' });
 
     } catch (err) {
         console.error('Signup error:', err);

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const employes = new mongoose.Schema({
     name: String,
-    employeeCode: { type: String, unique: true },
+    employeeCode: { type: String, unique: true ,sparse: true },
     department: {
         type: String,
     },
@@ -21,12 +21,10 @@ const employes = new mongoose.Schema({
     },
     contact: {
         phone: {
-            type: String,
-           
+            type: String,           
         },
         email: {
-            type: String,
-          
+            type: String,          
         },
         address: {
             type: String,

@@ -5,7 +5,7 @@ const sign_up = new mongoose.Schema({
     otpExpires: Date,
     isVerified: { type: Boolean, default: false },
     name: String,
-    employeeCode: { type: String, unique: true },
+    employeeCode: { type: String, unique: true, sparse: true },
     email: { type: String, unique: true },
     phone_no: String,
     address: String,
