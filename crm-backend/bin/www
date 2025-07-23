@@ -19,7 +19,7 @@ app.set('port', port);
 
 const mongoose = require('mongoose');
 
-mongoose.connect("mongodb://127.0.0.1:27017/crm")
+mongoose.connect("mongodb://192.168.1.100/crm")
   .then(() => console.log('Connected!'));
   
 

@@ -9,7 +9,6 @@ import OwnerDashboard from "./pages/OwnerDashboard";
 import UsersPage from "./pages/UsersPage";
 import EmployeeDetail from "./pages/EmployeeDetail";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
-import UserSelection from "./components/Auth/UserSelection";
 
 
 function ProtectedRoute({ children }) {
@@ -29,7 +28,6 @@ function App() {
               <Route path="/usersPage" element={<UsersPage />} />
                 <Route path="/employee/:email" element={<EmployeeDetail />} /> 
                 <Route path="/employeeDashboard" element={<EmployeeDashboard/>}/>
-                <Route path="/userselection" element={<UserSelection/>}/>
               
               <Route
                 path="/dashboard"

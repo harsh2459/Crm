@@ -3,22 +3,21 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const adminSchema = new mongoose.Schema({
+    otp: String,
+    otpExpires: Date,
+    isVerified: { type: Boolean, default: false },
     name: {
         type: String,
     },
     email: {
         type: String,
-        required: true,
-        unique: true, // Ensure email is unique for each admin
-        trim: true,
+        sparse: true
     },
     password: {
-        type: String,
-        required: true,
+        type: String
     },
     role: {
         type: String,
-        enum: ['admin', 'superadmin'],
         default: 'admin',
     },
     createdAt: {
