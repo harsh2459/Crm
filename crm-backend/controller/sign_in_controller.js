@@ -5,9 +5,8 @@ const sendOtpEmail = require('../utlis/sendEmail');
 const crypto = require('crypto');
 require('dotenv').config();
 
-const generateJwtToken = (userId, email,) => {
+const generateJwtToken = (userId, email,) => { 
 
-    // const secretKey = "58aa9b8a4a6b8d47a44790c83eea7affa212dc7112c5795818424b5de64d0f91" 
     const secretKey = process.env.JWT_SECRET;
 
     return jwt.sign(
@@ -79,7 +78,7 @@ exports.SendPasswordResetOtp = async (req, res) => {
         }
 
         const otp = generateOtp();
-        const otpExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+        const otpExpires = new Date(Date.now() + 15 * 60 * 1000); 
 
         if (!user) {
             user = new User({ email, otp, otpExpires });

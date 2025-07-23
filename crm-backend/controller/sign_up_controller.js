@@ -7,7 +7,6 @@ const sendOtpEmail = require('../utlis/sendEmail');
 const sendSignupEmail = require('../utlis/sendSignupEmail');
 const generateEmployeeCode = require('../utlis/generateEmployeeCode');
 
-
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -147,7 +146,7 @@ exports.CompleteSignup = async (req, res) => {
         user.otpVerified = false;
         await user.save();
         
-        await sendSignupEmail(email, employeeCode);
+        await sendSignupEmail(email, employeeCode ,name);
 
         res.status(200).json({
             message: 'Signup complete, credentials sent to email',
