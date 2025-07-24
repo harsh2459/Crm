@@ -5,8 +5,8 @@ const { verifyToken } = require('../middleware/auth');
 
 
 // route for admin sendotp
-router.post('/sendotp',adminController.sendOtp)
-router.post('/verify_otp',adminController.verifyOtp)
+router.post('/sendotp', adminController.sendOtp)
+router.post('/verify_otp', adminController.verifyOtp)
 // Route for Admin Signup
 router.post('/signup', adminController.AdminSignup);
 
@@ -15,8 +15,9 @@ router.post('/login', adminController.Adminlogin);
 
 
 // assain task to user throw admin
-router.post('/assign_task',  adminController.assignTask);
+router.post('/assign_task', verifyToken, adminController.assignTask);
 router.get('/get_tasks', verifyToken, adminController.getEmployeeTasks);
 router.post('/get_single_tasks', verifyToken, adminController.GetSingleEmployeeTasks);
+
 
 module.exports = router;

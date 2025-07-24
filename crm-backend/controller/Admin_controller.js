@@ -8,8 +8,8 @@ const sendEmailAdminOtpEmail = require('../utlis/sendEmailAdmin');
 require('dotenv').config();
 
 const generateJwtToken = (_id, email) => {
-    const secretKey = process.env.JWT_SECRET || 'defaultSecret'; // Use JWT secret key from .env file
-    return jwt.sign({ _id, email }, secretKey, { expiresIn: '1h' }); // Token expires in 1 hour
+    const secretKey = process.env.JWT_SECRET || '58aa9b8a4a6b8d47a44790c83eea7affa212dc7112c5795818424b5de64d0f91';
+    return jwt.sign({ _id, email }, secretKey, { expiresIn: '1h' });
 };
 
 function generateOtp() {
@@ -95,16 +95,14 @@ exports.AdminSignup = async (req, res) => {
 
         // Check if the admin exists and is verified
         if (!admin) return res.status(404).json({ error: 'Admin not found' });
-        if (!admin.isVerified) return res.status(400).json({ error: 'Admin is not verified' });
+        if (!admin.isVerified) return res.status(400).json({ error: 'Admin email is not verified' });
 
-        // Hash the password before saving it to the database
+        // Hash the password before saving
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Update the admin with the new password and save
-       
-        admin.name= name;
-        admin.email=email;
-        admin.password=password;
+        // Update the admin with the new password
+        admin.name = name;
+        admin.password = hashedPassword;
 
         await admin.save();
 
@@ -112,12 +110,11 @@ exports.AdminSignup = async (req, res) => {
             message: 'Admin created successfully',
             adminId: admin._id,
         });
-
     } catch (err) {
         console.error('Create Admin error:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
-}
+};
 
 exports.Adminlogin = async (req, res) => {
     const { email, password } = req.body;
@@ -144,6 +141,8 @@ exports.Adminlogin = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ error: 'Invalid credentials' });
         }
+        console.log('Entered Password:', password);
+        console.log('Stored Hashed Password:', admin.password);
 
         // Generate JWT token for the logged-in admin
         const token = generateJwtToken(admin._id, admin.email);
@@ -164,33 +163,37 @@ exports.Adminlogin = async (req, res) => {
 
 exports.assignTask = async (req, res) => {
     try {
-        const { employeeId, taskDescription, dueDate, adminId } = req.body;
+        const { employeeCode, taskDescription, dueDate, adminId } = req.body;
 
         // Validate input
-        if (!employeeId || !taskDescription || !adminId) {
+        if (!employeeCode || !taskDescription || !adminId) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
-        // Check if the employee exists (Employee _id should be used)
-        const employee = await Employee.findById(employeeId); // Use findById to get employee by _id
+        // Check if the employee exists using employeeCode
+        const employee = await Employee.findOne({ employeeCode }); // Using findOne() instead of find() to return the first match
         if (!employee) {
             return res.status(404).json({ error: 'Employee not found' });
         }
 
+        // Check if the admin exists
         const admin = await Admin.findById(adminId);
         if (!admin) {
             return res.status(404).json({ error: 'Admin not found' });
         }
 
+        // Create new task and assign it to the employee
         const newTask = new Task({
-            assignedTo: employee.name,
-            employeeCode: employee.employeeCode,
-            taskDescription,
-            // dueDate: new Date(dueDate),/
-            assignedBy: admin.name
+            assignedTo: employee.name, 
+            employeeCode,
+            taskDescription,  
+            assignedBy: admin.name 
         });
 
+        // Save the new task to the database
         await newTask.save();
+
+        // Create a notification for the employee
         await createNotification({
             empId: employee.employeeCode,
             title: "New Task Assigned",
@@ -198,6 +201,7 @@ exports.assignTask = async (req, res) => {
             type: "task"
         });
 
+        // Respond with success
         res.status(201).json({ message: 'Task assigned successfully', newTask });
 
     } catch (err) {

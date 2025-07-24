@@ -13,7 +13,6 @@ const taskSchema = new mongoose.Schema({
     },
     dueDate: {
         type: Date,
-        required: true
     },
     status: {
         type: String,
@@ -21,7 +20,7 @@ const taskSchema = new mongoose.Schema({
         default: 'Pending'
     },
     assignedBy: {
-        type: String,  // Change to String to store admin's name
+        type: String,  
         required: true
     },
     SendAt: {

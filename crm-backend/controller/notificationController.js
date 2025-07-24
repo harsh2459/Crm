@@ -61,3 +61,40 @@ exports.getSeparatedNotifications = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+// Delete all notifications for an employee
+exports.deleteAllNotifications = async (req, res) => {
+  const { empId } = req.params;
+
+  try {
+    // Delete all notifications for the specific employee
+    const result = await Notification.deleteMany({ empId });
+
+    res.status(200).json({
+      message: `All notifications deleted for employee ${empId}`,
+      deletedCount: result.deletedCount
+    });
+  } catch (err) {
+    console.error("Error deleting all notifications:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// delete all seen notifications
+exports.deleteAllSeenNotifications = async (req, res) => {
+  const { empId } = req.params;
+
+  try {
+    // Delete all seen notifications for the specific employee
+    const result = await Notification.deleteMany({ empId, seen: true });
+
+    res.status(200).json({
+      message: `All seen notifications deleted for employee ${empId}`,
+      deletedCount: result.deletedCount
+    });
+  } catch (err) {
+    console.error("Error deleting all seen notifications:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
