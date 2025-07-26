@@ -7,6 +7,7 @@ const messageSchema = new mongoose.Schema({
   content: { type: String },
   fileUrl: { type: String },
   fileType: { type: String },
+  isRead: { type: Boolean, default: false },
   timestamp: { type: Date, default: Date.now },
   seen: { type: Boolean, default: false }
 });

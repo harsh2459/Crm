@@ -21,4 +21,8 @@ router.get('/received/:empId', verifyToken,chatController.getReceivedMessages);
 
 router.get('/latest-messages/:empId', verifyToken,chatController.getLatestMessagesForInbox);
 
+router.put('/read/:chatRoomId/:empId', verifyToken, chatController.markAsRead);
+router.delete('/message/:messageId', verifyToken, chatController.deleteMessage);
+
+
 module.exports = router;

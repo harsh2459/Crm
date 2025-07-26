@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',

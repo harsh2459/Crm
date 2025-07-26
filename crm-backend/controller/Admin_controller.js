@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { createNotification } = require('./notificationController');
 const sendEmailAdminOtpEmail = require('../utlis/sendEmailAdmin');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const generateJwtToken = (_id, email) => {
     const secretKey = process.env.JWT_SECRET || '58aa9b8a4a6b8d47a44790c83eea7affa212dc7112c5795818424b5de64d0f91';

@@ -7,7 +7,7 @@
 var app = require('../app');
 var debug = require('debug')
 var http = require('http');
-
+const socketIo = require('socket.io');
 /**
  * Get port from environment and store in Express.
  */
@@ -21,7 +21,7 @@ const mongoose = require('mongoose');
 
 mongoose.connect("mongodb://192.168.1.100/crm")
   .then(() => console.log('Connected!'));
-  
+
 
 /*
     Create HTTP server.
@@ -29,17 +29,51 @@ mongoose.connect("mongodb://192.168.1.100/crm")
 
 var server = http.createServer(app);
 
+
+// Attach Socket.io to server
+const io = socketIo(server, { cors: { origin: '*' } });
+app.set('io', io);
+
+const onlineUsers = new Map();
+
+io.on('connection', (socket) => {
+    console.log('User connected:', socket.id);
+
+    socket.on('userOnline', (empId) => {
+        onlineUsers.set(empId, socket.id);
+        io.emit('onlineUsers', Array.from(onlineUsers.keys()));
+    });
+
+    socket.on('typing', (data) => {
+        socket.to(data.chatRoomId).emit('typing', data.empId);
+    });
+
+    socket.on('stopTyping', (data) => {
+        socket.to(data.chatRoomId).emit('stopTyping', data.empId);
+    });
+
+    socket.on('disconnect', () => {
+        for (let [empId, id] of onlineUsers.entries()) {
+            if (id === socket.id) {
+                onlineUsers.delete(empId);
+                break;
+            }
+        }
+        io.emit('onlineUsers', Array.from(onlineUsers.keys()));
+    });
+});
+
 /**
  * Listen on provided port, on all network interfaces.
  */
 server.listen(port, HOST, () => {
-  console.log(`Server running at http://${HOST}:${port}/`);
+  console.log(`Server running at http://${HOST}/`);
 });
 server.on('error', onError);
 server.on('listening', onListening);
 
 /**
- * Normalize a port into a number, string, or false.
+  Normalize a port into a number, string, or false.
  */
 
 function normalizePort(val) {
@@ -58,9 +92,9 @@ function normalizePort(val) {
   return false;
 }
 
-/**
+/*
  * Event listener for HTTP server "error" event.
- */
+*/
 
 function onError(error) {
   if (error.syscall !== 'listen') {

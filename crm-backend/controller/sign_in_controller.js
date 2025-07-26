@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../model/Sign_up');
 const sendOtpEmail = require('../utlis/sendEmail');
 const crypto = require('crypto');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const generateJwtToken = (userId, email,) => { 
 
